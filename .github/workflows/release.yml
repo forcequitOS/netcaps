@@ -58,7 +58,7 @@ jobs:
 
       - name: Update Homebrew Tap
         run: |
-          git clone https://x-access-token:${GITHUB_TOKEN}@github.com/forcequitOS/homebrew-brew tap
+          git clone https://x-access-token:${PAT_TOKEN}@github.com/forcequitOS/homebrew-brew tap
           cd tap
           sed -i.bak \
             -e "s|url \".*\"|url \"https://github.com/forcequitOS/netcaps/archive/refs/tags/${{ env.TAG }}.tar.gz\"|" \
@@ -71,4 +71,4 @@ jobs:
           git commit -m "netcaps ${{ env.VERSION }}"
           git push origin main
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PAT_TOKEN }}
