@@ -21,21 +21,18 @@ jobs:
       - name: Create git tag
         run: |
           VERSION='${{ github.event.inputs.version }}'
+          DESC='${{ github.event.inputs.description }}'
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG=v$VERSION" >> $GITHUB_ENV
           if [ -f changelog.md ]; then
-            CHANGELOG=$(cat changelog.md)
+            CHANGELOG=$(<changelog.md)
           else
             CHANGELOG="No release notes provided."
           fi
-          echo "$CHANGELOG" > tag_message.txt
-          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
-          echo "$CHANGELOG" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
-
+          printf "CHANGELOG=%q\n" "$CHANGELOG" >> $GITHUB_ENV
           git config user.name "netcaps-bot"
           git config user.email "bot@users.noreply.github.com"
-          git tag -a $TAG -F tag_message.txt
+          git tag -a $TAG -m "Release $VERSION"
           git push origin $TAG
 
       - name: Get source code sha256
