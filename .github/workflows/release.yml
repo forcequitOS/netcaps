@@ -66,6 +66,7 @@ jobs:
           git clone https://github.com/forcequitOS/homebrew-brew tap
           ls -la
           cd tap
+          ls -la
           sed -i.bak \
             -e "s|url \".*\"|url \"https://github.com/forcequitOS/netcaps/archive/refs/tags/${{ env.TAG }}.tar.gz\"|" \
             -e "s|sha256 \".*\"|sha256 \"${{ env.SHA256 }}\"|" \
