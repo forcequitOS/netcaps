@@ -104,8 +104,8 @@ struct main {
         let silent = args.contains("-s") || args.contains("--silent")
         if args.contains("-v") || args.contains("--version") {
             print("netcaps version 1.4.0")
-            print("Made by Taj C (forcequit)")
-            print("Check this out on GitHub, at https://github.com/forcequitOS/netcaps")
+            print("    Made by Taj C (forcequit)")
+            print("    Check this out on GitHub, at https://github.com/forcequitOS/netcaps")
             exit(0)
         }
         if args.contains("-h") || args.contains("--help") {

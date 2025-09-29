@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set version from commit
+        run: |
+          VERSION="$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG=v$VERSION" >> $GITHUB_ENV
+
+      - name: Build binary
+        run: |
+          swift build -c release --disable-sandbox
+          mv .build/release/netcaps netcaps-${{ env.VERSION }}-macos-arm64
+
+      - name: Create source tarball
+        run: |
+          git archive --format=tar.gz --prefix="netcaps-${{ env.VERSION }}/" HEAD > netcaps-${{ env.VERSION }}-src.tar.gz
+          echo "TARBALL=netcaps-${{ env.VERSION }}-src.tar.gz" >> $GITHUB_ENV
+
+      - name: Compute SHA256
+        run: |
+          SHA256=$(shasum -a 256 $TARBALL | cut -d ' ' -f 1)
+          echo "SHA256=$SHA256" >> $GITHUB_ENV
+
+      - name: Upload build artifacts (debugging)
+        uses: actions/upload-artifact@v4
+        with:
+          name: netcaps-${{ env.VERSION }}
+          path: |
+            netcaps-${{ env.VERSION }}-macos-arm64
+            netcaps-${{ env.VERSION }}-src.tar.gz
+
+      - name: Push binary to GitHub release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.TAG }}
+          files: |
+            netcaps-${{ env.VERSION }}-macos-arm64
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
