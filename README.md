@@ -2,7 +2,7 @@
 <img src="https://github.com/forcequitOS/netcaps/blob/main/netcaps.png?raw=true" width="30%">
 </p>
 
-## A network activity light on your Caps Lock key. 
+<h2 align="center">A network activity light on your Caps Lock key.</h2>
 **Try it today, you'll love it, or your money back!**
 
 ### Install:
