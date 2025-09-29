@@ -1,6 +1,5 @@
-<h1 align="center">netcaps</h1>
 <p align="center">
-<img src="https://github.com/forcequitOS/netcaps/blob/main/netcaps.png?raw=true" width="25%" alt="The beautiful netcaps logo, a keycap with a network label and a green LED lit.">
+<img src="https://github.com/forcequitOS/netcaps/blob/main/netcaps.png?raw=true" width="25%" alt="Keycap with netcaps text and a green LED lit">
 </p>
 
 ## A network activity light on your Caps Lock key. 
