@@ -6,6 +6,7 @@ import Darwin
 import IOKit
 import IOKit.hid
 import CoreGraphics
+import AppKit
 
 // MARK: - Caps Lock State
 func isCapsLockOn() -> Bool {
@@ -13,13 +14,11 @@ func isCapsLockOn() -> Bool {
 }
 
 @MainActor var legitInterval: TimeInterval = 0.00050
-func setInterval() {
-    Task { @MainActor in
-        if isCapsLockOn() {
-            legitInterval = 0.01050
-        } else {
-            legitInterval = 0.00050
-        }
+@MainActor func setInterval() {
+    if isCapsLockOn() {
+        legitInterval = 0.01550
+    } else {
+        legitInterval = 0.00050
     }
 }
 
@@ -32,9 +31,17 @@ func blinkCapsLock(times: Int = 1, interval: TimeInterval = legitInterval) {
         kIOHIDDeviceUsageKey as String: kHIDUsage_GD_Keyboard
     ]]
     IOHIDManagerSetDeviceMatchingMultiple(manager, match as CFArray)
-    IOHIDManagerOpen(manager, 0)
+    
+    let openRc = IOHIDManagerOpen(manager, IOOptionBits(kIOHIDOptionsTypeNone))
+    if openRc == kIOReturnNotPermitted {
+        print("Input Monitoring permissions need to be granted, exiting...")
+        NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ListenEvent")!)
+        exit(1)
+    }
+    
     guard let devicesCF = IOHIDManagerCopyDevices(manager) else { return }
     let devices = devicesCF as! Set<IOHIDDevice>
+    
     func toggle(_ on: Bool) {
         for device in devices {
             guard let elementsCF = IOHIDDeviceCopyMatchingElements(device, nil, 0) else { continue }
@@ -53,6 +60,7 @@ func blinkCapsLock(times: Int = 1, interval: TimeInterval = legitInterval) {
             }
         }
     }
+    
     let capsOn = isCapsLockOn()
     for _ in 1...times {
         if capsOn {
@@ -94,7 +102,7 @@ struct main {
         let args = CommandLine.arguments
         let silent = args.contains("-s") || args.contains("--silent")
         if args.contains("-v") || args.contains("--version") {
-            print("netcaps version 1.2.1")
+            print("netcaps version 1.3.0")
             print("Made by Taj C (forcequit)")
             print("Check this out on GitHub, at https://github.com/forcequitOS/netcaps")
             exit(0)
