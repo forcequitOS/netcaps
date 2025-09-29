@@ -7,8 +7,11 @@ on:
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release (e.g., 1.4.0)'
+        description: 'Release version'
         required: true
+      description:
+        description: 'Release notes'
+        required: false
 
 jobs:
   release:
@@ -18,11 +21,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set version from input
+      - name: Set version and description
         run: |
           VERSION="${{ github.event.inputs.version }}"
+          DESC="${{ github.event.inputs.description }}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG=v$VERSION" >> $GITHUB_ENV
+          echo "DESC=$DESC" >> $GITHUB_ENV
 
       - name: Create git tag
         run: |
@@ -31,28 +36,40 @@ jobs:
           git tag -a $TAG -m "Release $VERSION"
           git push origin $TAG
 
+      - name: Get source code sha256
+        run: |
+          git archive --format=tar.gz --prefix="netcaps-${{ env.VERSION }}/" HEAD > netcaps-${{ env.VERSION }}-src.tar.gz
+          SHA256=$(shasum -a 256 netcaps-${{ env.VERSION }}-src.tar.gz | cut -d ' ' -f 1)
+          echo "SHA256=$SHA256" >> $GITHUB_ENV
+
       - name: Build binary tarball
         run: |
           swift build -c release --disable-sandbox
           mv .build/release/netcaps netcaps
           tar -czf netcaps-${{ env.VERSION }}-macos-arm64.tar.gz netcaps
 
-      - name: Create source tarball
-        run: |
-          git archive --format=tar.gz --prefix="netcaps-${{ env.VERSION }}/" HEAD > netcaps-${{ env.VERSION }}-src.tar.gz
-
-      - name: Compute SHA256 of source tarball
-        run: |
-          SHA256=$(shasum -a 256 netcaps-${{ env.VERSION }}-src.tar.gz | cut -d ' ' -f 1)
-          echo "SHA256=$SHA256" >> $GITHUB_ENV
-
-      - name: Push release to GitHub
+      - name: Push release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.TAG }}
-          name: "Release ${{ env.VERSION }}"
+          name: "Version ${{ env.VERSION }}"
+          body: ${{ env.DESC }}
           files: |
             netcaps-${{ env.VERSION }}-macos-arm64.tar.gz
-            netcaps-${{ env.VERSION }}-src.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Homebrew formula
+        run: |
+          git clone https://github.com/forcequitOS/homebrew-brew tap
+          cd tap
+          sed -i.bak \
+            -e "s|url \".*\"|url \"https://github.com/forcequitOS/netcaps/archive/refs/tags/${{ env.TAG }}.tar.gz\"|" \
+            -e "s|sha256 \".*\"|sha256 \"${{ env.SHA256 }}\"|" \
+            -e "s|version \".*\"|version \"${{ env.VERSION }}\"|" \
+            Formula/netcaps.rb
+          git config user.name "netcaps-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git add Formula/netcaps.rb
+          git commit -m "netcaps ${{ env.VERSION }}"
+          git push origin main
