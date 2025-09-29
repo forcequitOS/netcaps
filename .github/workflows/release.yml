@@ -13,8 +13,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        
-      - name: Create git tag
+
+      - name: Create Git Tag
         run: |
           VERSION='${{ github.event.inputs.version }}'
           echo "VERSION=$VERSION" >> $GITHUB_ENV
@@ -32,20 +32,20 @@ jobs:
           git config user.email "bot@users.noreply.github.com"
           git tag -a "v$VERSION" -m "Version $VERSION"
           git push origin "v$VERSION"
-          
-      - name: Get source code sha256
+
+      - name: Get Source Code sha256
         run: |
           git archive --format=tar.gz --prefix="netcaps-${{ env.VERSION }}/" HEAD > netcaps-${{ env.VERSION }}-src.tar.gz
           SHA256=$(shasum -a 256 netcaps-${{ env.VERSION }}-src.tar.gz | cut -d ' ' -f 1)
           echo "SHA256=$SHA256" >> $GITHUB_ENV
-          
-      - name: Build binary tarball
+
+      - name: Build Binary Tarball
         run: |
           swift build -c release --disable-sandbox
           mv .build/release/netcaps netcaps
           tar -czf netcaps-${{ env.VERSION }}-macos-arm64.tar.gz netcaps
-          
-      - name: Push release
+
+      - name: Push Release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ env.TAG }}
@@ -55,8 +55,10 @@ jobs:
             netcaps-${{ env.VERSION }}-macos-arm64.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          
-      - name: Update Homebrew tap
+
+      - name: Update Homebrew Tap
+      	env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
         run: |
           git clone https://x-access-token:${GH_TOKEN}@github.com/forcequitOS/homebrew-brew tap
           cd tap
