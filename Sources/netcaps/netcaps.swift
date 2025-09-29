@@ -16,7 +16,7 @@ func isCapsLockOn() -> Bool {
 @MainActor var legitInterval: TimeInterval = 0.00050
 @MainActor func setInterval() {
     if isCapsLockOn() {
-        legitInterval = 0.01550
+        legitInterval = 0.01050
     } else {
         legitInterval = 0.00050
     }
@@ -102,7 +102,7 @@ struct main {
         let args = CommandLine.arguments
         let silent = args.contains("-s") || args.contains("--silent")
         if args.contains("-v") || args.contains("--version") {
-            print("netcaps version 1.3.0")
+            print("netcaps version 1.3.1")
             print("Made by Taj C (forcequit)")
             print("Check this out on GitHub, at https://github.com/forcequitOS/netcaps")
             exit(0)
