@@ -24,9 +24,9 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		36DEB8BB2E8A141B00BED146 /* netcaps */ = {
+		36D756502E8A20A2003065E0 /* Sources */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = netcaps;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -45,8 +45,8 @@
 		36DEB8B02E8A141B00BED146 = {
 			isa = PBXGroup;
 			children = (
+				36D756502E8A20A2003065E0 /* Sources */,
 				36D756482E8A1D7B003065E0 /* Package.swift */,
-				36DEB8BB2E8A141B00BED146 /* netcaps */,
 				36DEB8BA2E8A141B00BED146 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -75,7 +75,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				36DEB8BB2E8A141B00BED146 /* netcaps */,
+				36D756502E8A20A2003065E0 /* Sources */,
 			);
 			name = netcaps;
 			packageProductDependencies = (
