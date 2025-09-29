@@ -62,7 +62,7 @@ jobs:
       - name: Update Homebrew formula
         run: |
           git clone https://github.com/forcequitOS/homebrew-brew tap
-          cd tap
+          cd tap/formula
           sed -i.bak \
             -e "s|url \".*\"|url \"https://github.com/forcequitOS/netcaps/archive/refs/tags/${{ env.TAG }}.tar.gz\"|" \
             -e "s|sha256 \".*\"|sha256 \"${{ env.SHA256 }}\"|" \
