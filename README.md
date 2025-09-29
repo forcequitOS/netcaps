@@ -3,6 +3,7 @@
 </p>
 
 <h2 align="center">A network activity light on your Caps Lock key.</h2>
+
 **Try it today, you'll love it, or your money back!**
 
 ### Install:
