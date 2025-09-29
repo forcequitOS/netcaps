@@ -91,7 +91,7 @@ struct main {
         let args = CommandLine.arguments
         let silent = args.contains("-s") || args.contains("--silent")
         if args.contains("-v") || args.contains("--version") {
-            print("netcaps version 1.1")
+            print("netcaps version 1.1.0")
             print("Made by Taj C (forcequit)")
             print("Check this out on GitHub, at https://github.com/forcequitOS/netcaps")
             exit(0)
