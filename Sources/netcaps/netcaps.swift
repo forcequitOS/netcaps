@@ -14,10 +14,12 @@ func isCapsLockOn() -> Bool {
 
 @MainActor var legitInterval: TimeInterval = 0.00050
 func setInterval() {
-    if isCapsLockOn() {
-        legitInterval = 0.00750
-    } else {
-        legitInterval = 0.00050
+    Task { @MainActor in
+        if isCapsLockOn() {
+            legitInterval = 0.00750
+        } else {
+            legitInterval = 0.00050
+        }
     }
 }
 
