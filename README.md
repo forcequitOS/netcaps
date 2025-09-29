@@ -7,7 +7,7 @@
 **Try it today, you'll love it, or your money back!**
 
 ### Install:
-`brew tap forcequitOS/brew`
+`brew tap forcequitOS/brew https://github.com/forcequitOS/brew`
 
 `brew install netcaps`
 
@@ -15,7 +15,7 @@ It couldn't get much simpler than this.
 
 To run netcaps automagically on startup, do:
 
-`sudo brew services start netcaps`, or just `brew services start netcaps` to only run netcaps on your user account. 
+`sudo brew services start netcaps`, or just `brew services start netcaps` to only run netcaps on your user account. Grant Input Monitoring permissions to netcaps in System Settings, then run `(sudo) brew services restart netcaps` (or restart your machine) and you're off to the races, enjoy the light show. 
 
 All functionality of your Caps Lock key is 100% preserved with netcaps. Also, netcaps is proudly written using 100% Swift. Yay for me. 
 
