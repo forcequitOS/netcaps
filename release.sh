@@ -4,7 +4,7 @@ set -e
 echo "Version: 1.4.0"
 
 # 2️⃣ Create and push Git tag
-git tag -a "$VERSION" -m "v1.4.0"
+git tag -a "1.4.0" -m "v1.4.0"
 git push origin "1.4.0"
 
 # 3️⃣ Build the binary
