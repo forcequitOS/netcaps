@@ -33,6 +33,23 @@ jobs:
           git tag -a "v$VERSION" -m "Version $VERSION"
           git push origin "v$VERSION"
 
+      - name: Build Binary Tarball
+        run: |
+          swift build -c release --disable-sandbox
+          mv .build/release/netcaps netcaps
+          tar -czf netcaps-${{ env.VERSION }}-macos-arm64.tar.gz netcaps
+
+      - name: Push Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.TAG }}
+          name: "Version ${{ env.VERSION }}"
+          body: ${{ env.CHANGELOG }}
+          files: |
+            netcaps-${{ env.VERSION }}-macos-arm64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Get Source Tarball sha256
         run: |
           SRC_URL="https://github.com/forcequitOS/netcaps/archive/refs/tags/${{ env.TAG }}.tar.gz"
@@ -50,23 +67,6 @@ jobs:
           fi
           SHA256=$(shasum -a 256 "$OUT" | cut -d ' ' -f 1)
           echo "SHA256=$SHA256" >> $GITHUB_ENV
-
-      - name: Build Binary Tarball
-        run: |
-          swift build -c release --disable-sandbox
-          mv .build/release/netcaps netcaps
-          tar -czf netcaps-${{ env.VERSION }}-macos-arm64.tar.gz netcaps
-
-      - name: Push Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ env.TAG }}
-          name: "Version ${{ env.VERSION }}"
-          body: ${{ env.CHANGELOG }}
-          files: |
-            netcaps-${{ env.VERSION }}-macos-arm64.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Update Homebrew Tap
         run: |
