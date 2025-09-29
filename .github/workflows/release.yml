@@ -23,8 +23,8 @@ jobs:
 
       - name: Set version and description
         run: |
-          VERSION="${{ github.event.inputs.version }}"
-          DESC="${{ github.event.inputs.description }}"
+          VERSION='${{ github.event.inputs.version }}'
+          DESC='${{ github.event.inputs.description }}'
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG=v$VERSION" >> $GITHUB_ENV
           echo "DESC=$DESC" >> $GITHUB_ENV
