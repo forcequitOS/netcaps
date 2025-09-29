@@ -1,32 +1,60 @@
-name: Release
+name: Auto Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main  # or your default branch
 
 jobs:
-  build:
+  release:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
 
+      # Step 1: Extract version from commit message
+      - name: Get version from commit
+        id: version
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "Commit message: $COMMIT_MSG"
+          if [[ "$COMMIT_MSG" =~ v[0-9]+\.[0-9]+\.[0-9]+ ]]; then
+            VERSION="${BASH_REMATCH[0]}"
+            echo "Version detected: $VERSION"
+            echo "version=$VERSION" >> $GITHUB_OUTPUT
+          else
+            echo "No version found in commit message. Exiting."
+            exit 1
+          fi
+
+      # Step 2: Create Git tag for this version
+      - name: Create Git tag
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag -a ${{ steps.version.outputs.version }} -m "Release ${{ steps.version.outputs.version }}"
+          git push origin ${{ steps.version.outputs.version }}
+
+      # Step 3: Build binary
       - name: Build release binary
         run: swift build -c release --disable-sandbox
 
-      - name: Package binary
+      # Step 4: Package binary
+      - name: Package
         run: |
           mkdir -p dist
           cp .build/release/netcaps dist/
-          tar -czf netcaps-${{ github.ref_name }}-macos.tar.gz -C dist netcaps
+          tar -czf netcaps-${{ steps.version.outputs.version }}-macos.tar.gz -C dist netcaps
 
-      - name: Upload to release
+      # Step 5: Create release and upload asset
+      - name: Create GitHub release
         uses: softprops/action-gh-release@v2
         with:
-          files: netcaps-${{ github.ref_name }}-macos.tar.gz
+          tag_name: ${{ steps.version.outputs.version }}
+          files: netcaps-${{ steps.version.outputs.version }}-macos.tar.gz
           generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Step 6: Compute SHA256
       - name: Compute SHA256
-        run: shasum -a 256 netcaps-${{ github.ref_name }}-macos.tar.gz
+        run: shasum -a 256 netcaps-${{ steps.version.outputs.version }}-macos.tar.gz
