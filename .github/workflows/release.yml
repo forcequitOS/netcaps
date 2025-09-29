@@ -33,10 +33,22 @@ jobs:
           git tag -a "v$VERSION" -m "Version $VERSION"
           git push origin "v$VERSION"
 
-      - name: Get Source Code sha256
+      - name: Get Source Tarball sha256
         run: |
-          git archive --format=tar.gz --prefix="netcaps-${{ env.VERSION }}/" HEAD > netcaps-${{ env.VERSION }}-src.tar.gz
-          SHA256=$(shasum -a 256 netcaps-${{ env.VERSION }}-src.tar.gz | cut -d ' ' -f 1)
+          SRC_URL="https://github.com/forcequitOS/netcaps/archive/refs/tags/${{ env.TAG }}.tar.gz"
+          OUT="netcaps-${{ env.VERSION }}-src.tar.gz"
+          for i in {1..10}; do
+            if curl -sSLf -o "$OUT" "$SRC_URL"; then
+              break
+            fi
+            echo "Source tarball not yet available (attempt $i); retrying..."
+            sleep 3
+          done
+          if [ ! -s "$OUT" ]; then
+            echo "Failed to download source tarball from $SRC_URL"
+            exit 1
+          fi
+          SHA256=$(shasum -a 256 "$OUT" | cut -d ' ' -f 1)
           echo "SHA256=$SHA256" >> $GITHUB_ENV
 
       - name: Build Binary Tarball
