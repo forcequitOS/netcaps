@@ -2,11 +2,13 @@ name: Release
 
 permissions:
   contents: write
-  
+
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.4.0)'
+        required: true
 
 jobs:
   release:
@@ -16,41 +18,41 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set version from commit
+      - name: Set version from input
         run: |
-          VERSION="$(date +'%Y.%m.%d')-$(git rev-parse --short HEAD)"
+          VERSION="${{ github.event.inputs.version }}"
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "TAG=v$VERSION" >> $GITHUB_ENV
 
-      - name: Build binary
+      - name: Create git tag
+        run: |
+          git config user.name "netcaps-bot"
+          git config user.email "bot@users.noreply.github.com"
+          git tag -a $TAG -m "Release $VERSION"
+          git push origin $TAG
+
+      - name: Build binary tarball
         run: |
           swift build -c release --disable-sandbox
-          mv .build/release/netcaps netcaps-${{ env.VERSION }}-macos-arm64
+          mv .build/release/netcaps netcaps
+          tar -czf netcaps-${{ env.VERSION }}-macos-arm64.tar.gz netcaps
 
       - name: Create source tarball
         run: |
           git archive --format=tar.gz --prefix="netcaps-${{ env.VERSION }}/" HEAD > netcaps-${{ env.VERSION }}-src.tar.gz
-          echo "TARBALL=netcaps-${{ env.VERSION }}-src.tar.gz" >> $GITHUB_ENV
 
-      - name: Compute SHA256
+      - name: Compute SHA256 of source tarball
         run: |
-          SHA256=$(shasum -a 256 $TARBALL | cut -d ' ' -f 1)
+          SHA256=$(shasum -a 256 netcaps-${{ env.VERSION }}-src.tar.gz | cut -d ' ' -f 1)
           echo "SHA256=$SHA256" >> $GITHUB_ENV
 
-      - name: Upload build artifacts (debugging)
-        uses: actions/upload-artifact@v4
-        with:
-          name: netcaps-${{ env.VERSION }}
-          path: |
-            netcaps-${{ env.VERSION }}-macos-arm64
-            netcaps-${{ env.VERSION }}-src.tar.gz
-
-      - name: Push binary to GitHub release
+      - name: Push release to GitHub
         uses: softprops/action-gh-release@v1
         with:
-          name: "Latest netcaps build"
-          tag_name: latest
+          tag_name: ${{ env.TAG }}
+          name: "Release ${{ env.VERSION }}"
           files: |
-            netcaps-${{ env.VERSION }}-macos-arm64
+            netcaps-${{ env.VERSION }}-macos-arm64.tar.gz
+            netcaps-${{ env.VERSION }}-src.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
