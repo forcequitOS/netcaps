@@ -35,7 +35,7 @@ All functionality of your Caps Lock key is 100% preserved with netcaps. Also, ne
 >[!WARNING]
 I don't know if this will impact your battery life or if it'll kill your Caps Lock key LED over time. Your mileage may vary. I'm not responsible if this somehow blows up your computer, but it probably shouldn't.
 
->[!NOTE]
+>[!TIP]
 Want to monitor disk activity instead of network activity? Check out the sister program, discaps, [right here.](https://github.com/forcequitOS/discaps)
 
 ---
