@@ -77,18 +77,19 @@ func blinkCapsLock(times: Int = 1, interval: TimeInterval = legitInterval) {
 }
 
 // MARK: - Network Monitoring
-func getNetworkBytes() -> (rx: UInt32, tx: UInt32) {
+func getNetworkBytes() -> (rx: UInt64, tx: UInt64) {
     var ifaddr: UnsafeMutablePointer<ifaddrs>?
     guard getifaddrs(&ifaddr) == 0, let firstAddr = ifaddr else { return (0, 0) }
     defer { freeifaddrs(ifaddr) }
-    var rx: UInt32 = 0
-    var tx: UInt32 = 0
+    var rx: UInt64 = 0
+    var tx: UInt64 = 0
     var ptr = firstAddr
     while true {
         if let data = ptr.pointee.ifa_data?.assumingMemoryBound(to: if_data.self) {
-            rx += data.pointee.ifi_ibytes
-            tx += data.pointee.ifi_obytes
+            rx &+= UInt64(data.pointee.ifi_ibytes)
+            tx &+= UInt64(data.pointee.ifi_obytes)
         }
+        
         if ptr.pointee.ifa_next == nil { break }
         ptr = ptr.pointee.ifa_next!
     }
@@ -102,7 +103,7 @@ struct main {
         let args = CommandLine.arguments
         let silent = args.contains("-s") || args.contains("--silent")
         if args.contains("-v") || args.contains("--version") {
-            print("netcaps version 1.3.1")
+            print("netcaps version 1.4.0")
             print("Made by Taj C (forcequit)")
             print("Check this out on GitHub, at https://github.com/forcequitOS/netcaps")
             exit(0)

@@ -1,0 +1,31 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build release binary
+        run: swift build -c release --disable-sandbox
+
+      - name: Package binary
+        run: |
+          mkdir -p dist
+          cp .build/release/netcaps dist/
+          tar -czf netcaps-${GITHUB_REF_NAME}-macos.tar.gz -C dist netcaps
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: netcaps-${GITHUB_REF_NAME}-macos.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute SHA256
+        run: shasum -a 256 netcaps-${GITHUB_REF_NAME}-macos.tar.gz
