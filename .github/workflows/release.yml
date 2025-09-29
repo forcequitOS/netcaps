@@ -18,7 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set version and description
+      - name: Create git tag
         run: |
           VERSION='${{ github.event.inputs.version }}'
           DESC='${{ github.event.inputs.description }}'
@@ -30,9 +30,6 @@ jobs:
             CHANGELOG="No release notes provided."
           fi
           printf "CHANGELOG=%q\n" "$CHANGELOG" >> $GITHUB_ENV
-
-      - name: Create git tag
-        run: |
           git config user.name "netcaps-bot"
           git config user.email "bot@users.noreply.github.com"
           git tag -a $TAG -m "Release $VERSION"
@@ -63,10 +60,8 @@ jobs:
 
       - name: Update Homebrew tap
         run: |
-          git clone https://github.com/forcequitOS/homebrew-brew tap
-          ls -la
+          git clone https://x-access-token:${GH_TOKEN}@github.com/forcequitOS/homebrew-brew tap
           cd tap
-          ls -la
           sed -i.bak \
             -e "s|url \".*\"|url \"https://github.com/forcequitOS/netcaps/archive/refs/tags/${{ env.TAG }}.tar.gz\"|" \
             -e "s|sha256 \".*\"|sha256 \"${{ env.SHA256 }}\"|" \
